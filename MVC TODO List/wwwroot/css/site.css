@@ -1,0 +1,157 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+a, a:hover, a:focus, a:active {
+	text-decoration: none !important;
+	color: inherit;
+}
+
+:root {
+  --border: 1px solid #575757;
+  --border-radius: 4px;
+}
+
+.list-button {
+	background: none;
+	color: inherit;
+	border: none;
+	padding: 0;
+	font: inherit;
+	cursor: pointer;
+	outline: inherit;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  border-bottom: var(--border);
+  text-align: center;
+
+  > * {
+    border-right: var(--border);
+  }
+  
+  > *:last-child {
+    border-right: none;
+  }
+  
+  > .content {
+    flex: 1;
+    padding: 4px 0px;
+  }
+
+  .button {
+    flex: 0;
+    padding: 4px 8px;
+  }
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  border: var(--border);
+  border-radius: var(--border-radius);
+  height: 90vh;
+  background-color: #FFFFFA;
+
+  > .header {
+    font-size: x-large;    
+  }
+
+  > .body {
+    display: flex;
+    height: 100%;
+    min-height: 0px;
+  }
+}
+
+.group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-right: var(--border);
+
+  > .header {
+    flex: 0;
+    font-weight: bold;
+  }
+
+  > .body {
+    flex: 1;
+    overflow-y: auto;
+  }
+}
+
+.group:last-child {
+ border: none;
+}
+
+.item {
+  text-align: center;
+  border: var(--border);
+  border-radius: var(--border-radius);
+  margin: 8px;
+
+  > .header {
+    font-size: x-small;
+    font-weight: bold;
+    color: #575757;
+  }
+
+  > .body {
+    .name {
+      margin-top: 4px;
+    }
+  
+    .description {
+      font-size: smaller;
+      color: rgb(94, 94, 94);
+      margin: 4px 0px;
+      padding: 0px 4px;
+    }
+  }
+
+  &[priority="minor"] {
+    background-color: #96B1EB;
+
+    .header {
+      background-color: #6A9AEB;
+    }
+  }
+
+  &[priority="normal"] {
+    background-color: #CDEB96;
+
+    .header {
+      background-color: #C7EB6A;
+    }
+  }
+
+  &[priority="major"] {
+    background-color: #EAA496;
+
+    .header {
+      background-color: #EB7A69;
+    }
+  }
+}

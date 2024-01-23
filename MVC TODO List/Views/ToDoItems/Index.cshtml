@@ -1,0 +1,62 @@
+﻿@using MVC_TODO_List.Enums
+@model IEnumerable<ToDoItemModel>
+
+@{
+    ViewData["Title"] = "To Do List";
+}
+
+<div class="list">
+    <div class="header">
+        <span class="content">
+            To Do List
+        </span>
+        <a asp-action="Add">
+            +
+        </a>
+    </div>
+    <div class="body">
+        @foreach (var status in Constants.ItemStatuses)
+        {
+            <div class="group">
+                <div class="header">
+                    <span class="content">
+                        @status.Value
+                    </span>
+                </div>
+                <div class="body">
+                    @foreach (var item in Model.Where(x => x.Status == status.Key))
+                    {
+                        <div class="item"
+                             priority="@item.Priority.ToString().ToLower()">
+                            <div class="header">
+                                @if (item.Status != ItemStatus.Canceled || item.Status != ItemStatus.Completed)
+                                {
+                                    <button class="list-button button cancel_button">
+                                        ✗
+                                    </button>
+                                }
+                                <span class="content">
+                                    •••
+                                </span>
+                                @if (item.Status != ItemStatus.Canceled || item.Status != ItemStatus.Completed)
+                                {
+                                    <button class="list-button button complete_button">
+                                        ✓
+                                    </button>
+                                }
+                            </div>
+                            <div class="body">
+                                <div class="name">
+                                    @item.Name
+                                </div>
+                                <div class="description">
+                                    @item.Description
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
