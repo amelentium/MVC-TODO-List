@@ -18,7 +18,8 @@ namespace MVC_TODO_List.Controllers
             return View(items);
         }
 
-        public async Task<IActionResult> Add(ToDoItemAddModel itemAdd)
+        [HttpPost]
+        public async Task<IActionResult> Add([FromBody] ToDoItemAddModel itemAdd)
         {
             try
             {
@@ -27,15 +28,17 @@ namespace MVC_TODO_List.Controllers
                     var item = mapper.Map<ToDoItemModel>(itemAdd);
                     await context.AddAsync(item);
                     await context.SaveChangesAsync();
-                    return RedirectToAction("Index");
+                    return Ok(item);
+                } 
+                else
+                {
+                    return BadRequest(ModelState);
                 }
             }
             catch
             {
-                ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
+                return Problem("Unable to save changes. Try again, and if the problem persists see your system administrator.");
             }
-
-            return View(itemAdd);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

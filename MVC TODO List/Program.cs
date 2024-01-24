@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using MVC_TODO_List.Contexts;
 
@@ -10,7 +9,9 @@ namespace MVC_TODO_List
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllersWithViews();
+            builder.Services
+                .AddControllersWithViews()
+                .AddNewtonsoftJson();
 
             builder.Services.AddAutoMapper(typeof(Program));
 

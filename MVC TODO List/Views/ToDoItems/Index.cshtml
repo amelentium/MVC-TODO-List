@@ -10,14 +10,15 @@
         <span class="content">
             To Do List
         </span>
-        <a asp-action="Add">
+        <button class="list-button button" onclick="addItem()">
             +
-        </a>
+        </button>
     </div>
     <div class="body">
         @foreach (var status in Constants.ItemStatuses)
         {
-            <div class="group">
+            <div class="group"
+                 status="@status.Key">
                 <div class="header">
                     <span class="content">
                         @status.Value
@@ -26,8 +27,9 @@
                 <div class="body">
                     @foreach (var item in Model.Where(x => x.Status == status.Key))
                     {
-                        <div class="item"
-                             priority="@item.Priority.ToString().ToLower()">
+                        <div id="@item.Id"
+                             class="item"
+                             priority="@item.Priority">
                             <div class="header">
                                 @if (item.Status != ItemStatus.Canceled || item.Status != ItemStatus.Completed)
                                 {
@@ -45,7 +47,8 @@
                                     </button>
                                 }
                             </div>
-                            <div class="body">
+                            <div class="body clickable"
+                                 onclick="editItem(event)">
                                 <div class="name">
                                     @item.Name
                                 </div>
@@ -60,3 +63,179 @@
         }
     </div>
 </div>
+
+<dialog id="edit_dialog">
+    <div class="header">
+        <button id="delete_button"
+              class="list-button button">
+            ♺
+        </button>
+        <span class="content">
+            Edit Item
+        </span>
+    </div>
+    <div class="body">
+        <div class="body property_field">
+            <span>
+                <label for="name">
+                    Name:
+                </label>
+            </span>
+            <span>
+                <input id="name"
+                       type="text"
+                       class="property_element" />
+            </span>
+        </div>
+        <div class="body property_field">
+            <span>
+                <label for="description">
+                    Description:
+                </label>
+            </span>
+            <span>
+                <textarea id="description"
+                          class="property_element"
+                          cols="40" rows="3">
+            </textarea>
+            </span>
+        </div>
+        <div class="body property_field">
+            <span>
+                <label for="priority">
+                    Priority:
+                </label>
+            </span>
+            <span>
+                <select id="priority"
+                        class="property_element">
+                    <option value="@ItemPriority.Minor">
+                        Minor
+                    </option>
+                    <option value="@ItemPriority.Normal" selected>
+                        Normal
+                    </option>
+                    <option value="@ItemPriority.Major">
+                        Major
+                    </option>
+                </select>
+            </span>
+        </div>
+        <div class="body property_field">
+            <span>
+                <label for="status">
+                    Status:
+                </label>
+            </span>
+            <span>
+                <select id="status"
+                        class="property_element">
+                    <option value="@ItemStatus.Planned" selected>
+                        Planned
+                    </option>
+                    <option value="@ItemStatus.InProgress">
+                        In Progress
+                    </option>
+                    <option value="@ItemStatus.Completed">
+                        Completed
+                    </option>
+                    <option value="@ItemStatus.Canceled">
+                        Canceled
+                    </option>
+                </select>
+            </span>
+        </div>
+        <div class="button_block">
+            <button id="discard_button"
+                  class="list-button button"
+                  onclick="closeEditDialog()">
+                ✗
+            </button>
+            <button id="save_button"
+                  class="list-button button">
+                ✓
+            </button>
+        </div>
+    </div>
+</dialog>
+
+@section Scripts {
+    <script>
+        const editDialog = $('#edit_dialog')[0]
+        const editNameElement = editDialog.querySelector('#name')
+        const editDescriptionElement = editDialog.querySelector('#description')
+        const editPriorityElement = editDialog.querySelector('#priority')
+        const editStatusElement = editDialog.querySelector('#status')
+
+        const createItemButton = $('#add_button')[0]
+        const deleteButton = $('#delete_button')[0]
+        const saveChangesButton = $('#save_button')[0]
+        const discardChangesButton = $('#discard_button')[0]
+        const item = {}
+        let controller = '@ViewContext.RouteData.Values["controller"]', actionUrl = ''
+
+        function saveItem(url) {
+            item.Name = editNameElement.value
+            item.Description = editDescriptionElement.value
+            item.Priority = editPriorityElement.value
+            item.Status = editStatusElement.value
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: JSON.stringify(item),
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                success: () => {
+                    location.reload()
+                },
+                error: () => {
+                    alert('Error while saving data')
+                }
+            });
+        }
+
+        function openEditDialog(itemElement) {
+            if (itemElement) {
+                item.Name = itemElement.querySelector('.name').innerText
+                item.Description = itemElement.querySelector('.description').innerText
+                item.Priority = itemElement.getAttribute('priority')
+                item.Status = itemElement.closest('.group').getAttribute('status')
+
+                actionUrl = `${controller}/Update/${itemElement.id}`
+                $('#delete_button').show()
+            } else {
+                item.Name = ''
+                item.Description = ''
+                item.Priority = 'Normal'
+                item.Status = 'InProgress'
+
+                actionUrl = `${controller}/Add`
+                $('#delete_button').hide()
+            }
+
+            editNameElement.value = item.Name
+            editDescriptionElement.value = item.Description
+            editPriorityElement.value = item.Priority
+            editStatusElement.value = item.Status
+
+            saveChangesButton.addEventListener('click', () => { saveItem(actionUrl) })
+
+            editDialog.showModal()
+        }
+
+        function closeEditDialog() {
+            editDialog.close()
+        }
+
+        function addItem() {
+            openEditDialog()
+        }
+
+        function editItem(e) {
+            const itemElement = e.target.closest('.item')
+
+            openEditDialog(itemElement)
+        }
+    </script>
+}
