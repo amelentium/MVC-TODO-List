@@ -10,10 +10,10 @@ namespace MVC_TODO_List.Models
 
         public string? Description { get; set; }
 
-        public ItemPriority Priority { get; set; }
+        public ItemPriority Priority { get; set; } = ItemPriority.Normal;
 
-        public ItemStatus Status { get; set; }
+        public ItemStatus Status { get; set; } = ItemStatus.Planned;
 
-        public DateTime CreatedAt { get; init; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

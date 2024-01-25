@@ -30,8 +30,8 @@ namespace MVC_TODO_List.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("now() at time zone 'utc'");
+                        .HasColumnType("timestamp without time zone")
+                        .HasDefaultValueSql("now()::timestamp");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");

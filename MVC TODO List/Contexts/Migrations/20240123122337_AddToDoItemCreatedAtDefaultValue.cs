@@ -14,11 +14,11 @@ namespace MVC_TODO_List.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "ToDoItems",
-                type: "timestamp with time zone",
+                type: "timestamp without time zone",
                 nullable: false,
-                defaultValueSql: "now() at time zone 'utc'",
+                defaultValueSql: "now()::timestamp",
                 oldClrType: typeof(DateTime),
-                oldType: "timestamp with time zone");
+                oldType: "timestamp without time zone");
         }
 
         /// <inheritdoc />
@@ -27,11 +27,11 @@ namespace MVC_TODO_List.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "ToDoItems",
-                type: "timestamp with time zone",
+                type: "timestamp without time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
-                oldType: "timestamp with time zone",
-                oldDefaultValueSql: "now() at time zone 'utc'");
+                oldType: "timestamp without time zone",
+                oldDefaultValueSql: "now()::timestamp");
         }
     }
 }

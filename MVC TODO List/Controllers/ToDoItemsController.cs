@@ -13,7 +13,7 @@ namespace MVC_TODO_List.Controllers
         {
             var items = (await context.ToDoItems.ToListAsync())
                 .OrderByDescending(x => x.Priority)
-                .ThenBy(x => x.CreatedAt);
+                .ThenByDescending(x => x.CreatedAt);
 
             return View(items);
         }

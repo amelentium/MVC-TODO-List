@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MVC_TODO_List.Contexts;
+using MVC_TODO_List.Contexts.Seeds;
 
 namespace MVC_TODO_List
 {
@@ -8,6 +9,7 @@ namespace MVC_TODO_List
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            var isInMemory = false;
 
             builder.Services
                 .AddControllersWithViews()
@@ -21,6 +23,7 @@ namespace MVC_TODO_List
                 if (string.IsNullOrEmpty(connection))
                 {
                     options.UseInMemoryDatabase(Constants.InMemoryDB);
+                    isInMemory = true;
                 }
                 else
                 {
@@ -34,6 +37,18 @@ namespace MVC_TODO_List
             {
                 app.UseExceptionHandler("/ToDoItems/Error");
                 app.UseHsts();
+            }
+
+            using (var context = app.Services.CreateScope().ServiceProvider.GetRequiredService<ToDoDBContext>())
+            {
+                if (!isInMemory && context.Database.GetPendingMigrations().Any())
+                {
+                    context.Database.Migrate();
+                }
+
+                if (!context.ToDoItems.Any()) {
+                    context.SeedItems();
+                }
             }
 
             app.UseHttpsRedirection();

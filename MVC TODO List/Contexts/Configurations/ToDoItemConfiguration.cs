@@ -23,7 +23,11 @@ namespace MVC_TODO_List.Contexts.Configurations
 
             builder
                 .Property(x => x.CreatedAt)
-                .HasDefaultValueSql("now() at time zone 'utc'");
+                .HasConversion(
+                    v => v,
+                    v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
+                )
+                .HasDefaultValueSql("now()::timestamp");
         }
     }
 }
