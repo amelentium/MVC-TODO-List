@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MVC_TODO_List.Models
 {
-    public class ToDoItemAddModel
+    public class ToDoItemDto
     {
         [Required]
         [MaxLength(50)]

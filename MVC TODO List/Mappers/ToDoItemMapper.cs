@@ -7,7 +7,7 @@ namespace MVC_TODO_List.Mappers
     {
         public ToDoItemMapper()
         {
-            CreateMap<ToDoItemAddModel, ToDoItemModel>();
+            CreateMap<ToDoItemDto, ToDoItemModel>();
         }
     }
 }

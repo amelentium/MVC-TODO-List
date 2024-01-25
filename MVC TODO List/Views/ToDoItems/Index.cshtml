@@ -29,20 +29,23 @@
                     {
                         <div id="@item.Id"
                              class="item"
-                             priority="@item.Priority">
+                             priority="@item.Priority"
+                             draggable="true" ondragstart="itemDragStart(event)">
                             <div class="header">
-                                @if (item.Status != ItemStatus.Canceled || item.Status != ItemStatus.Completed)
+                                @if (item.Status != ItemStatus.Canceled && item.Status != ItemStatus.Completed)
                                 {
-                                    <button class="list-button button cancel_button">
+                                    <button class="list-button button cancel_button"
+                                            onclick="changeItemStatusOnClick(event, '@ItemStatus.Canceled')">
                                         ✗
                                     </button>
                                 }
-                                <span class="content">
+                                <span class="content dragger">
                                     •••
                                 </span>
-                                @if (item.Status != ItemStatus.Canceled || item.Status != ItemStatus.Completed)
+                                @if (item.Status != ItemStatus.Canceled && item.Status != ItemStatus.Completed)
                                 {
-                                    <button class="list-button button complete_button">
+                                    <button class="list-button button complete_button"
+                                            onclick="changeItemStatusOnClick(event, '@ItemStatus.Completed')">
                                         ✓
                                     </button>
                                 }
@@ -162,28 +165,31 @@
 @section Scripts {
     <script>
         const editDialog = $('#edit_dialog')[0]
+
         const editNameElement = editDialog.querySelector('#name')
         const editDescriptionElement = editDialog.querySelector('#description')
         const editPriorityElement = editDialog.querySelector('#priority')
         const editStatusElement = editDialog.querySelector('#status')
 
-        const createItemButton = $('#add_button')[0]
-        const deleteButton = $('#delete_button')[0]
-        const saveChangesButton = $('#save_button')[0]
-        const discardChangesButton = $('#discard_button')[0]
+        const editSaveButton = $('#save_button')
+        const editDeleteButton = $('#delete_button')
+
         const item = {}
-        let controller = '@ViewContext.RouteData.Values["controller"]', actionUrl = ''
+        let controller = '@ViewContext.RouteData.Values["controller"]', actionUrl = '', methodType = ''
 
-        function saveItem(url) {
-            item.Name = editNameElement.value
-            item.Description = editDescriptionElement.value
-            item.Priority = editPriorityElement.value
-            item.Status = editStatusElement.value
+        function copyDataFromItemElement(itemElement) {
+            item.id = itemElement.id
+            item.Name = itemElement.querySelector('.name').innerText
+            item.Description = itemElement.querySelector('.description').innerText
+            item.Priority = itemElement.getAttribute('priority')
+            item.Status = itemElement.closest('.group').getAttribute('status')
+        }
 
+        function makeChangeRequest(url, type, data) {
             $.ajax({
-                type: 'POST',
+                type: type,
                 url: url,
-                data: JSON.stringify(item),
+                data: JSON.stringify(data),
                 dataType: 'json',
                 contentType: 'application/json; charset=utf-8',
                 success: () => {
@@ -192,26 +198,52 @@
                 error: () => {
                     alert('Error while saving data')
                 }
-            });
+            })
+        }
+
+        function saveItem(url, type) {
+            item.Name = editNameElement.value
+            item.Description = editDescriptionElement.value
+            item.Priority = editPriorityElement.value
+            item.Status = editStatusElement.value
+
+            makeChangeRequest(url, type, item)
+        }
+
+        function changeItemStatus(item, newStatus) {
+            item.Status = newStatus
+
+            actionUrl = `${controller}/Update/${item.id}`
+            methodType = 'PUT'
+
+            makeChangeRequest(actionUrl, methodType, item)
+        }
+
+        function changeItemStatusOnClick(e, newStatus) {
+            const itemElement = e.target.closest('.item')
+
+            copyDataFromItemElement(itemElement)
+
+            changeItemStatus(item, newStatus)
         }
 
         function openEditDialog(itemElement) {
             if (itemElement) {
-                item.Name = itemElement.querySelector('.name').innerText
-                item.Description = itemElement.querySelector('.description').innerText
-                item.Priority = itemElement.getAttribute('priority')
-                item.Status = itemElement.closest('.group').getAttribute('status')
+                copyDataFromItemElement(itemElement)
 
-                actionUrl = `${controller}/Update/${itemElement.id}`
-                $('#delete_button').show()
+                actionUrl = `${controller}/Update/${item.id}`
+                methodType = 'PUT'
+                editDeleteButton.show()
+                editDeleteButton.click(() => { makeChangeRequest(`${controller}/Delete/${item.id}`, 'DELETE') })
             } else {
                 item.Name = ''
                 item.Description = ''
-                item.Priority = 'Normal'
-                item.Status = 'InProgress'
+                item.Priority = '@ItemPriority.Normal'
+                item.Status = '@ItemStatus.Planned'
 
                 actionUrl = `${controller}/Add`
-                $('#delete_button').hide()
+                methodType = 'POST'
+                editDeleteButton.hide()
             }
 
             editNameElement.value = item.Name
@@ -219,12 +251,17 @@
             editPriorityElement.value = item.Priority
             editStatusElement.value = item.Status
 
-            saveChangesButton.addEventListener('click', () => { saveItem(actionUrl) })
+            editSaveButton.click(() => { saveItem(actionUrl, methodType) })
 
             editDialog.showModal()
         }
 
         function closeEditDialog() {
+            editNameElement.value = ''
+            editDescriptionElement.value = ''
+            editPriorityElement.value = '@ItemPriority.Normal'
+            editStatusElement.value = '@ItemStatus.Planned'
+
             editDialog.close()
         }
 
@@ -237,5 +274,32 @@
 
             openEditDialog(itemElement)
         }
+
+        function itemDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.id)
+            e.dataTransfer.effectAllowed = 'move'
+        }
+        
+        function itemDragover(e) {
+            e.preventDefault()
+        }
+
+        function itemDrop(e, status) {
+            const itemId = e.dataTransfer.getData('text/plain')
+            const itemElement = $(`#${itemId}`)[0]
+
+            copyDataFromItemElement(itemElement)
+
+            if (item.Status !== status) {
+                item.Status = status
+                changeItemStatus(item, status)
+            }
+        }
+
+        $('.group').each((i, group) => {
+            const status = group.getAttribute('status')
+            group.addEventListener('dragover', (event) => itemDragover(event))
+            group.addEventListener('drop', (event) => itemDrop(event, status))
+        })
     </script>
 }
